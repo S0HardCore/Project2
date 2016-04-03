@@ -9,6 +9,18 @@ namespace WindowsFormsApplication2
     public partial class Form1 : Form
     {
         #region Constants
+        enum ZombieTypes
+        {
+            NORMAL = 0,
+            BIG = 1,
+            HUGE = 2,
+        }
+        enum ZombieActions
+        {
+            WALK = 0,
+            STAND = 1,
+            ATTACK = 2,
+        }
         const int
             MAX_OFFSET_X = 1000,
             MAX_OFFSET_Y = 1000,
@@ -17,6 +29,10 @@ namespace WindowsFormsApplication2
             HEXAGON_MARGIN = 4,
             ZOMBIE_WIDTH = 81,
             ZOMBIE_HEIGHT = 62,
+            BIG_ZOMBIE_WIDTH = 147,
+            BIG_ZOMBIE_HEIGHT = 192,
+            HUGE_ZOMBIE_WIDTH = 242,
+            HUGE_ZOMBIE_HEIGHT = 206,
             EXPLOSION_SIZE = 96,
             EXPLOSION_FRAMES = 15,
             LIGHTNING_FRAMES = 7,
@@ -37,6 +53,8 @@ namespace WindowsFormsApplication2
             };
         static readonly Size
             ZOMBIE_SIZE = new Size(ZOMBIE_WIDTH, ZOMBIE_HEIGHT),
+            BIG_ZOMBIE_SIZE = new Size(BIG_ZOMBIE_WIDTH, BIG_ZOMBIE_HEIGHT),
+            HUGE_ZOMBIE_SIZE = new Size(HUGE_ZOMBIE_WIDTH, HUGE_ZOMBIE_HEIGHT),
             LIGHTNING_SIZE = new Size(LIGHTNING_WIDTH, LIGHTNING_HEIGHT);
         static readonly Font
             Verdana16 = new Font("Verdana", 16),
@@ -45,13 +63,15 @@ namespace WindowsFormsApplication2
             Verdana9 = new Font("Verdana", 9);
         static Bitmap
             iZombie = Properties.Resources.zombie,
+            iBigZombie = Properties.Resources.big_zombie,
             iCursor = Properties.Resources.cursor,
             iCrossHair = Properties.Resources.crosshair,
             iSniperRifle = Properties.Resources.sniper_rifle,
             iLightningEffect = Properties.Resources.lightning,
             iExplosionEffect = Properties.Resources.explosion,
             iLightningIcon = Properties.Resources.lightning_icon,
-            iExplosionIcon = Properties.Resources.explosion_icon;
+            iExplosionIcon = Properties.Resources.explosion_icon,
+            iHugeZombie = Properties.Resources.huge_zombie;
         static readonly Color[]
             HealthColor = new Color[]
             {
@@ -75,9 +95,9 @@ namespace WindowsFormsApplication2
 
             static private Rectangle CONSOLE_REGION;
 
-            public string getString() {  return consoleString; }
+            public string getString() { return consoleString; }
 
-            public string getPrevString() {  return consolePrevString; }
+            public string getPrevString() { return consolePrevString; }
 
             public string getLog() { return consoleLog; }
 
@@ -91,7 +111,7 @@ namespace WindowsFormsApplication2
 
             public Rectangle getRegion()
             {
-                CONSOLE_REGION = new Rectangle (0, 0, 520, 50);
+                CONSOLE_REGION = new Rectangle(0, 0, 520, 50);
                 return CONSOLE_REGION;
             }
 
@@ -168,10 +188,12 @@ namespace WindowsFormsApplication2
                         break;
                     case "FREEZE":
                     case "STOP":
+                        consoleLog = "Zombies are freezed.";
                         zombieFreeze = true;
                         break;
                     case "UNFREEZE":
                     case "GO":
+                        consoleLog = "Zombies are unfreezed.";
                         zombieFreeze = false;
                         break;
                     case "AUTO":
@@ -224,6 +246,8 @@ namespace WindowsFormsApplication2
 
         class Zombie
         {
+            ZombieTypes ZombieType;
+            ZombieActions ZombieAction;
             PointF Position;
             Boolean Alive = true;
             int Direction;
@@ -235,11 +259,51 @@ namespace WindowsFormsApplication2
             {
                 Position = new Point(x, y);
             }
-            public Zombie(int x, int y, int _Direction)
+            public Zombie(int x, int y, int _Direction):this(x, y)
             {
-                Position = new Point(x, y);
                 Direction = _Direction;
             }
+
+            public Zombie(int x, int y, int _Direction, ZombieTypes Type):this(x, y, _Direction)
+            {
+                ZombieType = Type;
+                switch (Type)
+                {
+                    case ZombieTypes.HUGE:
+                        Health = 50;
+                        MaxHealth = 50;
+                        break;
+                    case ZombieTypes.BIG:
+                        Health = 20;
+                        MaxHealth = 20;
+                        break;
+                    case ZombieTypes.NORMAL:
+                        Health = 10;
+                        MaxHealth = 10;
+                        break;
+                }
+            }
+            
+            public Zombie(int x, int y, int _Direction, ZombieTypes Type, ZombieActions Action):this(x, y, _Direction, Type)
+            {
+                ZombieAction = Action;
+            }
+
+            public ZombieTypes getZombieType()
+            {
+                return ZombieType;
+            }
+
+            public ZombieActions getZombieAction()
+            {
+                return ZombieAction;
+            }
+
+            public void setZombieAction(ZombieActions Action)
+            {
+                ZombieAction = Action;
+            }
+
             public PointF getPosition()
             {
                 return Position;
@@ -254,35 +318,97 @@ namespace WindowsFormsApplication2
                 int Y = (int)Position.Y;
                 return Y;
             }
-            public Rectangle getRectangle(Boolean actual)
+            public Rectangle getRectangle(Boolean actual, ZombieTypes Type)
             {
-                Rectangle Region;
-                if (actual)
+                Rectangle Region = new Rectangle((int)Position.X + 5, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
+                switch (Type)
+                {
+                    case ZombieTypes.NORMAL:
+                        #region NORMAL
+                        if (actual)
+                            switch (Direction)
+                            {
+                                case 0:
+                                    Region = new Rectangle((int)Position.X, (int)Position.Y + 10, ZOMBIE_WIDTH - 20, ZOMBIE_HEIGHT - 5);
+                                    break;
+                                case 1:
+                                    Region = new Rectangle((int)Position.X + 5, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
+                                    break;
+                                case 2:
+                                    Region = new Rectangle((int)Position.X + 5, (int)Position.Y + 5, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
+                                    break;
+                                case 3:
+                                    Region = new Rectangle((int)Position.X + 10, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        else
+                            Region = new Rectangle(new Point((int)Position.X, (int)Position.Y), ZOMBIE_SIZE);
+                        break;
+                        #endregion 
+                    case ZombieTypes.BIG:
+                        #region BIG
+                        if (actual)
+                            switch (Direction)
+                            {
+                                case 0:
+                                    Region = new Rectangle((int)Position.X + 15, (int)Position.Y + 15, BIG_ZOMBIE_WIDTH + 10, BIG_ZOMBIE_HEIGHT - 65);
+                                    break;
+                                case 1:
+                                    Region = new Rectangle((int)Position.X + 5, (int)Position.Y + 10, BIG_ZOMBIE_WIDTH - 15, BIG_ZOMBIE_HEIGHT - 15);
+                                    break;
+                                case 2:
+                                    Region = new Rectangle((int)Position.X + 20, (int)Position.Y, BIG_ZOMBIE_WIDTH + 20, BIG_ZOMBIE_HEIGHT - 55);
+                                    break;
+                                case 3:
+                                    Region = new Rectangle((int)Position.X + 5, (int)Position.Y + 15, BIG_ZOMBIE_WIDTH - 15, BIG_ZOMBIE_HEIGHT - 30);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        else
+                            Region = new Rectangle(new Point((int)Position.X, (int)Position.Y), BIG_ZOMBIE_SIZE);
+                        break;
+                        #endregion
+                    case ZombieTypes.HUGE:
+                        #region HUGE
+                        if (actual)
+                        {
+                            Region = new Rectangle((int)Position.X, (int)Position.Y, HUGE_ZOMBIE_WIDTH, HUGE_ZOMBIE_HEIGHT);
+                            switch (Direction)
+                            {
+                                case 0:
+                                    Region.Inflate(-35, -10);
+                                    Region.Offset(-20, 23);
+                                    break;
+                                case 1:
+                                    Region.Inflate(-30, -6);
+                                    Region.Offset(-15, 0);
+                                    break;
+                                case 2:
+                                    Region.Inflate(-30, -6);
+                                    Region.Offset(-15, 0);
+                                    break;
+                                case 3:
+                                    Region.Inflate(-20, -6);
+                                    Region.Offset(5, 0);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        else
+                            Region = new Rectangle(new Point((int)Position.X, (int)Position.Y), HUGE_ZOMBIE_SIZE);
+                        break;
+                    #endregion
+                }
+                return Region;
                 #region RectangleRotateGovnocod
                 {
-                    switch(Direction)
-                    {
-                        case 0:
-                            Region = new Rectangle((int)Position.X, (int)Position.Y + 10, ZOMBIE_WIDTH - 20, ZOMBIE_HEIGHT - 5);
-                            break;
-                        case 1:
-                            Region = new Rectangle((int)Position.X + 5, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
-                            break;
-                        case 2:
-                            Region = new Rectangle((int)Position.X + 5, (int)Position.Y + 5, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
-                            break;
-                        case 3:
-                            Region = new Rectangle((int)Position.X + 10, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
-                            break;
-                        default:
-                            Region = new Rectangle((int)Position.X + 5, (int)Position.Y, ZOMBIE_WIDTH - 15, ZOMBIE_HEIGHT - 5);
-                            break;
-                    }
+                    
                 }
                 #endregion
-                else
-                    Region = new Rectangle(new Point((int)Position.X, (int)Position.Y), ZOMBIE_SIZE);
-                return Region;
             }
             public int getDirection()
             {
@@ -299,13 +425,25 @@ namespace WindowsFormsApplication2
             public Rectangle getHealthBar()
             {
                 Rectangle Rect = new Rectangle((int)Position.X, (int)Position.Y - (Direction % 2 == 0 ? 0 : 10), Health * ZOMBIE_WIDTH / MaxHealth, 8);
+                switch(ZombieType)
+                {
+                    case ZombieTypes.NORMAL:
+                        Rect = new Rectangle((int)Position.X, (int)Position.Y - (Direction % 2 == 0 ? 0 : 10), Health * ZOMBIE_WIDTH / MaxHealth, 8);
+                        break;
+                    case ZombieTypes.BIG:
+                        Rect = new Rectangle((int)Position.X + 15, (int)Position.Y - (Direction % 2 == 0 ? 0 : 10), Health * (BIG_ZOMBIE_WIDTH - 30) / MaxHealth, 8);
+                        break;
+                    case ZombieTypes.HUGE:
+                        Rect = new Rectangle((int)Position.X + 30, (int)Position.Y - (Direction % 2 == 0 ? 0 : 10), Health * (HUGE_ZOMBIE_WIDTH - 80) / MaxHealth, 8);
+                        break;
+                }
                 return Rect;
             }
             public SolidBrush getHealthBrush()
             {
                 Color Color = HealthColor[0];
                 float HealthRatio = 4 * Health / MaxHealth;
-                if (Health > 0) 
+                if (Health > 0)
                     Color = HealthColor[4 - (int)HealthRatio];
                 SolidBrush Brush = new SolidBrush(Color);
                 return Brush;
@@ -386,20 +524,20 @@ namespace WindowsFormsApplication2
                 new Point(910 + 3 * HEXAGON_WIDTH / 4 + HEXAGON_MARGIN, 780 + 3 * (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
                 new Point(910, 780 + HEXAGON_HEIGHT + 4)
             };
-        Point[] getHexagonPosition()
-        {
-            Point[] Points = new Point[7]
-            {
-                new Point((currentResolution.Width - 300) / 2 + HEXAGON_WIDTH / 4, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN )/ 2),
-                new Point((currentResolution.Width - 100) / 2, currentResolution.Height - 300),
-                new Point((currentResolution.Width - 100) / 2 + 3 * HEXAGON_WIDTH / 4 + HEXAGON_MARGIN, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
-                new Point((currentResolution.Width - 300) / 2 + HEXAGON_WIDTH / 4, currentResolution.Height - 300 + 3 * (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
-                new Point((currentResolution.Width - 100) / 2, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN) * 2),
-                new Point((currentResolution.Width - 100) / 2 + 3 * HEXAGON_WIDTH / 4 + HEXAGON_MARGIN, currentResolution.Height - 300 + 3 * (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
-                new Point((currentResolution.Width - 100) / 2, currentResolution.Height - 300 + HEXAGON_HEIGHT + 4)
-            };
-            return Points;
-        }
+        //Point[] getHexagonPosition()
+        //{
+        //    Point[] Points = new Point[7]
+        //    {
+        //        new Point(1920 / 2 - 150 + HEXAGON_WIDTH / 4, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN )/ 2),
+        //        new Point(1920 / 2 - 50, currentResolution.Height - 300),
+        //        new Point(1920 / 2 - 50 + 3 * HEXAGON_WIDTH / 4 + HEXAGON_MARGIN, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
+        //        new Point(1920 / 2 - 150 + HEXAGON_WIDTH / 4, currentResolution.Height - 300 + 3 * (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
+        //        new Point(1920 / 2 - 50, currentResolution.Height - 300 + (HEXAGON_HEIGHT + HEXAGON_MARGIN) * 2),
+        //        new Point(1920 / 2 - 50 + 3 * HEXAGON_WIDTH / 4 + HEXAGON_MARGIN, currentResolution.Height - 300 + 3 * (HEXAGON_HEIGHT + HEXAGON_MARGIN) / 2),
+        //        new Point(1920 / 2 - 50, currentResolution.Height - 300 + HEXAGON_HEIGHT + 4)
+        //    };
+        //    return Points;
+        //}
         Boolean[]
             HexagonHover = new Boolean[7],
             HexagonKeys = new Boolean[7];
@@ -434,7 +572,7 @@ namespace WindowsFormsApplication2
 
         void applyCommand()
         {
-            switch(HexagonString)
+            switch (HexagonString)
             {
                 case "":
                     currentWeapon = WeaponType.CURSOR;
@@ -466,12 +604,9 @@ namespace WindowsFormsApplication2
         }
         static WeaponType currentWeapon;
 
-        static Rectangle
-            SPELL_SLOT_RECT = new Rectangle(650, 930, 100, 100);
-
         Rectangle getSpellSlot()
         {
-            Rectangle Rect = new Rectangle((currentResolution.Width - 620) / 2, currentResolution.Height - 150, 100, 100);
+            Rectangle Rect = new Rectangle(650, 930, 100, 100);
             return Rect;
         }
 
@@ -503,7 +638,7 @@ namespace WindowsFormsApplication2
                                     lightningFrames = 0;
                                     WeaponEffect[a] = false;
                                 }
-                                    break;
+                                break;
                         }
                 if (CDT[(int)currentWeapon] >= SPELL_COOLDOWNS[(int)currentWeapon])
                 {
@@ -516,7 +651,7 @@ namespace WindowsFormsApplication2
         }
         #endregion
 
-        ConsolePrototype 
+        ConsolePrototype
             Console = new ConsolePrototype();
         static Timer
             updateTimer = new Timer(),
@@ -532,7 +667,6 @@ namespace WindowsFormsApplication2
             zombieFrames, zombieCount = 8, zombieTotalCount = 8,
             explosionFrames, lightningFrames;
         private static int lastTick, lastFrameRate, frameRate;
-        Rectangle[] aaaaar;
         public static int CalculateFrameRate()
         {
             if (System.Environment.TickCount - lastTick >= 1000)
@@ -565,14 +699,18 @@ namespace WindowsFormsApplication2
             CooldownTimer.Tick += new EventHandler(CDTT);
             CooldownTimer.Start();
             for (int a = 0; a < 7; ++a)
-            {
-                Hexagon[a].AddPolygon(BuildHexagon(getHexagonPosition()[a]));
-            }
-            for (int a = 0; a < 4; ++a)
-                zUnits.Add(new Zombie(500, 100 + 50 * a, a));
-            for (int a = 0; a < 4; ++a)
-                zUnits.Add(new Zombie(585, 100 + 50 * a, a));
+                Hexagon[a].AddPolygon(BuildHexagon(HexagonPosition[a]));
+            for (int a = 0; a < 2; ++a)
+                zUnits.Add(new Zombie(300 + a * 50, 40 + 80 * a, 1));
+            for (int a = 0; a < 2; ++a)
+                zUnits.Add(new Zombie(1800 - a * 50, 600 + 80 * a, 3));
+            for (int a = 0; a < 2; ++a)
+                zUnits.Add(new Zombie(560 + a * 30, 350 + 120 * a, 2, ZombieTypes.BIG));
+            for (int a = 0; a < 2; ++a)
+                zUnits.Add(new Zombie(60 + a * 160, 980 + a * 20, 1, ZombieTypes.HUGE));
             ImageAnimator.Animate(iZombie, this.pUpdate);
+            ImageAnimator.Animate(iBigZombie, this.pUpdate);
+            ImageAnimator.Animate(iHugeZombie, this.pUpdate);
             TextFormatCenter.Alignment = StringAlignment.Center;
         }
 
@@ -580,9 +718,6 @@ namespace WindowsFormsApplication2
         {
             Point temp = ConvertClickPoint(e.X, e.Y, false, true),
                 temptwo = ConvertClickPoint(e.X, e.Y, true, true);
-            //temptwo.Offset(new Point(-mouseOffset.X, -mouseOffset.Y));
-            //temptwo.X = (int)(temptwo.X * GetResolutionRatio().Width);
-            //temptwo.Y = (int)(temptwo.Y * GetResolutionRatio().Height);
             if (e.Button == MouseButtons.Left)
             {
                 for (int q = 0; q < 7; ++q)
@@ -602,7 +737,7 @@ namespace WindowsFormsApplication2
                             zUnits[q].setAlive(false);
                         }
                         else
-                            if (zUnits[q].getRectangle(true).Contains(temptwo))
+                            if (zUnits[q].getRectangle(true, zUnits[q].getZombieType()).Contains(temptwo))
                             {
                                 switch (currentWeapon)
                                 {
@@ -637,7 +772,7 @@ namespace WindowsFormsApplication2
                                             WeaponEffectPoint[(int)currentWeapon] = offsetedPoint;
                                             foreach (Point TP in NearPoints)
                                                 foreach (Zombie TZ in zUnits)
-                                                    if (TZ.getRectangle(true).Contains(TP))
+                                                    if (TZ.getRectangle(true, TZ.getZombieType()).Contains(TP))
                                                         TZ.doDamage(3, WeaponType.EXPLOSION);
                                         }
                                         break;
@@ -661,7 +796,7 @@ namespace WindowsFormsApplication2
                                             WeaponEffectPoint[(int)currentWeapon] = new Point(temptwo.X, temptwo.Y);
                                             foreach (Point TP in NearPoints)
                                                 foreach (Zombie TZ in zUnits)
-                                                    if (TZ.getRectangle(true).Contains(TP))
+                                                    if (TZ.getRectangle(true, TZ.getZombieType()).Contains(TP))
                                                         TZ.doDamage(2, WeaponType.LIGHTNING);
                                         }
                                         break;
@@ -672,7 +807,6 @@ namespace WindowsFormsApplication2
 
         void pMouseUp(object sender, MouseEventArgs e)
         {
-            //Point temptwo = ConvertClickPoint(e.X, e.Y, false);
             for (int q = 0; q < 7; ++q)
             {
                 HexagonHover[q] = false;
@@ -816,10 +950,15 @@ namespace WindowsFormsApplication2
         {
             if (!isPaused)
             {
-                if (zombieFrames < 240)
-                    zombieFrames++;
-                else
-                    zombieFrames = 0;
+                if (!zombieFreeze)
+                    if (zombieFrames < 29)
+                    {
+                        int RandomNumberForSlowSprite = new Random(DateTime.Now.Millisecond).Next(100);
+                        if (RandomNumberForSlowSprite < 75)
+                            zombieFrames++;
+                    }
+                    else
+                        zombieFrames = 0;
 
                 if (zombieCount > 0)
                 {
@@ -896,10 +1035,11 @@ namespace WindowsFormsApplication2
 
             g.TranslateTransform(mouseOffset.X, mouseOffset.Y);
             g.ScaleTransform(GetResolutionRatio().Width, GetResolutionRatio().Height);
-            ImageAnimator.UpdateFrames();
-            
+            if (!zombieFreeze)
+                ImageAnimator.UpdateFrames();
+
             String RightBlockInfo = "Count: " + zombieCount + "/" + zombieTotalCount + "\n";
-            
+
             if (zombieTotalCount > 0)
                 foreach (var q in zUnits)
                 {
@@ -913,27 +1053,29 @@ namespace WindowsFormsApplication2
                             RightBlockInfo += q.getPosition().ToString();
                             RightBlockInfo += "\nHealth: ";
                             RightBlockInfo += q.getHealth();
-                            RightBlockInfo += "; Alive? ";
-                            RightBlockInfo += q.isAlive().ToString();
+                            RightBlockInfo += ";Type:";
+                            RightBlockInfo += q.getZombieType().ToString();
                             RightBlockInfo += "\n-------------------------\n";
                         }
 
-                        Bitmap temp = RotateZombie(q);
-                        //g.TranslateTransform(mouseOffset.X, mouseOffset.Y);
-                        //g.ScaleTransform(GetResolutionRatio().Width, GetResolutionRatio().Height);
+                        Bitmap temp = new Bitmap(iZombie);
+                        switch (q.getZombieType())
+                        {
+                            case ZombieTypes.NORMAL:
+                                temp = RotateZombie(q, iZombie);
+                                break;
+                            case ZombieTypes.BIG:
+                                temp = RotateZombie(q, iBigZombie);
+                                break;
+                            case ZombieTypes.HUGE:
+                                temp = RotateZombie(q, iHugeZombie);
+                                break;
+                        }
                         g.DrawImage(temp, q.getPosition());
                         g.FillRectangle(q.getHealthBrush(), q.getHealthBar());
-                        //g.ScaleTransform(1 / GetResolutionRatio().Width, 1 / GetResolutionRatio().Height);
-                        //g.TranslateTransform(-mouseOffset.X, -mouseOffset.Y);
                     }
                     if (showHitbox)
-                    {
-                        g.DrawRectangle(Pens.Black, q.getRectangle(true));
-                        //g.ResetTransform();
-                        //g.DrawRectangle(Pens.Red, q.getRectangle(true));
-                        //g.ScaleTransform(GetResolutionRatio().Width, GetResolutionRatio().Height);
-                        //g.TranslateTransform(mouseOffset.X, mouseOffset.Y);
-                    }
+                        g.DrawRectangle(Pens.Black, q.getRectangle(true, q.getZombieType()));
                 }
 
             g.ResetTransform();
@@ -1024,18 +1166,16 @@ namespace WindowsFormsApplication2
                 case WeaponType.LIGHTNING:
                     g.DrawImage(iLightningIcon, getSpellSlot());
                     break;
-            } 
+            }
             g.DrawRectangle(new Pen(Color.Goldenrod, 2), getSpellSlot());
             if (CDT[(int)currentWeapon] != 0 && currentWeapon != WeaponType.CURSOR)
             {
                 g.FillPie(new SolidBrush(Color.FromArgb(90, 190, 190, 190)), getSpellSlot(), -90, -6 * (SPELL_COOLDOWNS[(int)currentWeapon] - CDT[(int)currentWeapon]));
-                g.DrawString(Math.Round(CDT[(int)currentWeapon], 1).ToString(), Verdana9, Brushes.LightGoldenrodYellow,getSpellSlot().X + (CDT[(int)currentWeapon] < 10 ? 74 : 67), getSpellSlot().Y + 84);
+                string temps = Math.Round(SPELL_COOLDOWNS[(int)currentWeapon] - Math.Round(CDT[(int)currentWeapon], 1), 1).ToString();
+                g.DrawString(temps, Verdana9, Brushes.LightGoldenrodYellow, getSpellSlot().X + (Double.Parse(temps) < 10 ? 73 : 67), getSpellSlot().Y + 84);
             }
             #endregion
 
-
-            
-            g.ScaleTransform(GetResolutionRatio().Width, GetResolutionRatio().Height);
             for (int a = 0; a < 7; ++a)
             {
                 if (HexagonHover[a])
@@ -1071,9 +1211,9 @@ namespace WindowsFormsApplication2
                     RightBlockInfo += Math.Round(CDT[a], 1);
                     RightBlockInfo += "\n";
                 }
-                g.DrawString(RightBlockInfo, Verdana11, Brushes.Black, currentResolution.Width - 180, 0);
+                g.DrawString(RightBlockInfo, Verdana11, Brushes.Black, currentResolution.Width - 200, 0);
 
-                g.DrawString("FPS: " + CalculateFrameRate().ToString() + "\nCursor Position:\n" + mousePosition.ToString() + "\nOffset: \n" + mouseOffset.ToString() + "\nConsole String:" + Console.getString() + "\nHexagon String:" + HexagonString + "\nMonitor Resolution:\n" + Screen.PrimaryScreen.Bounds.Size.ToString() + "\nApp Resolution:\n" + currentResolution.ToString(), Verdana11, Brushes.Black, 0, (Console.Enabled ? 50 : 0));
+                g.DrawString("FPS: " + CalculateFrameRate().ToString() + "\nCursor Position:\n" + mousePosition.ToString() + "\nOffset: \n" + mouseOffset.ToString() + "\nConsole String:" + Console.getString() + "\nHexagon String:" + HexagonString + "\nMonitor Resolution:\n" + Screen.PrimaryScreen.Bounds.Size.ToString() + "\nApp Resolution:\n" + currentResolution.ToString() + "\nResolution Ratio:\n" + GetResolutionRatio().ToString(), Verdana11, Brushes.Black, 0, (Console.Enabled ? 50 : 0));
             }
             #endregion
 
@@ -1085,11 +1225,12 @@ namespace WindowsFormsApplication2
                 temp.Offset(-iCrossHair.Width / 2, -iCrossHair.Height / 2);
                 g.DrawImage(iCrossHair, temp);
             }
+            g.DrawRectangle(Pens.Black, new Rectangle(new Point(0,0), currentResolution));
         }
 
-        private static Bitmap RotateZombie(Zombie q)
+        private static Bitmap RotateZombie(Zombie q, Image image)
         {
-            Bitmap temp = new Bitmap(iZombie);
+            Bitmap temp = new Bitmap(image);
             switch (q.getDirection())
             {
                 case 0:

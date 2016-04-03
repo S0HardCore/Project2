@@ -113,6 +113,16 @@ namespace WindowsFormsApplication2.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap huge_zombie {
+            get {
+                object obj = ResourceManager.GetObject("huge_zombie", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap lightning {
             get {
                 object obj = ResourceManager.GetObject("lightning", resourceCulture);
