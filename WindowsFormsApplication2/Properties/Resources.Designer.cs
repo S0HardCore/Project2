@@ -73,6 +73,16 @@ namespace WindowsFormsApplication2.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap big_zombie_idle {
+            get {
+                object obj = ResourceManager.GetObject("big_zombie_idle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap crosshair {
             get {
                 object obj = ResourceManager.GetObject("crosshair", resourceCulture);
@@ -123,6 +133,16 @@ namespace WindowsFormsApplication2.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap huge_zombie_idle {
+            get {
+                object obj = ResourceManager.GetObject("huge_zombie_idle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap lightning {
             get {
                 object obj = ResourceManager.GetObject("lightning", resourceCulture);
@@ -156,6 +176,16 @@ namespace WindowsFormsApplication2.Properties {
         internal static System.Drawing.Bitmap zombie {
             get {
                 object obj = ResourceManager.GetObject("zombie", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap zombie_idle {
+            get {
+                object obj = ResourceManager.GetObject("zombie_idle", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -121,6 +121,9 @@
   <data name="big_zombie" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\big_zombie.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="big_zombie_idle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\big_zombie_idle.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="crosshair" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\crossair.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -136,6 +139,9 @@
   <data name="huge_zombie" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\walk.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="huge_zombie_idle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\huge_zombie_idle.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="lightning" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\lightning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -147,5 +153,8 @@
   </data>
   <data name="zombie" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\zombie01.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="zombie_idle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\zombie_idle.gif;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
