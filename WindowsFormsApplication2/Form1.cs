@@ -644,10 +644,10 @@ namespace WindowsFormsApplication2
         static Size
             currentResolution = new Size(1920, 1080);
         static Boolean
-            isPaused, showDI, showHitbox, zombieFreeze;
+            isPaused, showDI, showHitbox, zombieFreeze = true;
         static int
             zombieFrames, zombieCount = 8, zombieTotalCount = 8;
-        static int[,] map = new int[(MAX_OFFSET_X * 2 + 1920) / 5, (MAX_OFFSET_Y * 2 + 1080) / 5];
+        static int[,] map = new int[(MAX_OFFSET_Y * 2 + 1080) / 5, (MAX_OFFSET_X * 2 + 1920) / 5];
         static int[] effectsFrames = new int[WEAPONS_COUNT] { 0, 0, 0, 0, 0, 0 };
         private static int lastTick, lastFrameRate, frameRate;
         public static int CalculateFrameRate()
@@ -682,16 +682,16 @@ namespace WindowsFormsApplication2
             cooldownTimer.Start();
             for (int a = 0; a < map.GetLength(0); ++a)
                 for (int b = 0; b < map.GetLength(1); ++b)
-                    if (a % 100 == 0 | b % 100 == 0)
+                    if (a % 100 == 0 | b % 100 == 0)//if ((a % 20 == 0 & b % 20 == 0) || (a % 20 == 10 & b % 20 == 10))
                         map[a, b] = 1;
             for (int a = 0; a < 7; ++a)
                 Hexagon[a].AddPolygon(BuildHexagon(HexagonPosition[a]));
             for (int a = 0; a < 2; ++a)
-                zUnits.Add(new Zombie(300 + a * 50, 40 + 80 * a, 1));
+                zUnits.Add(new Zombie(300 + a * 50, 640 + 80 * a, 0));
             for (int a = 0; a < 2; ++a)
                 zUnits.Add(new Zombie(1800 - a * 50, 600 + 80 * a, 3));
             for (int a = 0; a < 2; ++a)
-                zUnits.Add(new Zombie(560 + a * 30, 350 + 120 * a, 2, ZombieTypes.BIG));
+                zUnits.Add(new Zombie(560 + a * 30, 550 + 120 * a, 2, ZombieTypes.BIG));
             for (int a = 0; a < 2; ++a)
                 zUnits.Add(new Zombie(60 + a * 160, 980 + a * 20, 1, ZombieTypes.HUGE));
             ImageAnimator.Animate(iZombie, this.pUpdate);
@@ -963,45 +963,47 @@ namespace WindowsFormsApplication2
                                 float y = zUnits[q].getY();
                                 float sx = zUnits[q].getRectangle(true, zUnits[q].getZombieType()).Width;
                                 float sy = zUnits[q].getRectangle(true, zUnits[q].getZombieType()).Height;
-                                switch (zUnits[q].getDirection())
-                                {
-                                    case 0:
-                                        if (y > -MAX_OFFSET_Y && map[(int)((y - 1) / 5), (int)(x / 5)] == 0)
-                                            zUnits[q].changePosition(0, -1);
-                                        else
-                                        {
-                                            zUnits[q].setDirection(3);
-                                            zUnits[q].setZombieAction(ZombieActions.STAND);
-                                        }
-                                        break;
-                                    case 1:
-                                        if (x + sx < 1920 + MAX_OFFSET_X && map[(int)(y / 5), (int)((x + sx + 1) / 5)] == 0)
-                                            zUnits[q].changePosition(1, 0);
-                                        else
-                                        {
-                                            zUnits[q].setDirection(0);
-                                            zUnits[q].setZombieAction(ZombieActions.STAND);
-                                        }
-                                        break;
-                                    case 2:
-                                        if (y + sy < 1080 + MAX_OFFSET_Y && map[(int)((y + sy + 1) / 5), (int)(x / 5)] == 0)
-                                            zUnits[q].changePosition(0, 1);
-                                        else
-                                        {
-                                            zUnits[q].setDirection(1);
-                                            zUnits[q].setZombieAction(ZombieActions.STAND);
-                                        }
-                                        break;
-                                    case 3:
-                                        if (x > -MAX_OFFSET_X && map[(int)(y / 5), (int)((x - 1) / 5)] == 0)
-                                            zUnits[q].changePosition(-1, 0);
-                                        else
-                                        {
-                                            zUnits[q].setDirection(2);
-                                            zUnits[q].setZombieAction(ZombieActions.STAND);
-                                        }
-                                        break;
-                                }
+                                ZombieStep(zUnits[q], x + 1920 + mouseOffset.X, y + 1080 + mouseOffset.Y, sx, sy, zUnits[q].getDirection(), 0);
+                                //    }
+                                //switch (zUnits[q].getDirection())
+                                //{
+                                //    case 0:
+                                //        if (y > -MAX_OFFSET_Y && map[(int)((y - 1) / 5), (int)(x / 5)] == 0)
+                                //            zUnits[q].changePosition(0, -1);
+                                //        else
+                                //        {
+                                //            zUnits[q].setDirection(3);
+                                //            zUnits[q].setZombieAction(ZombieActions.STAND);
+                                //        }
+                                //        break;
+                                //    case 1:
+                                //        if (x + sx < 1920 + MAX_OFFSET_X && map[(int)(y / 5), (int)((x + sx + 1) / 5)] == 0)
+                                //            zUnits[q].changePosition(1, 0);
+                                //        else
+                                //        {
+                                //            zUnits[q].setDirection(0);
+                                //            zUnits[q].setZombieAction(ZombieActions.STAND);
+                                //        }
+                                //        break;
+                                //    case 2:
+                                //        if (y + sy < 1080 + MAX_OFFSET_Y && map[(int)((y + sy + 1) / 5), (int)(x / 5)] == 0)
+                                //            zUnits[q].changePosition(0, 1);
+                                //        else
+                                //        {
+                                //            zUnits[q].setDirection(1);
+                                //            zUnits[q].setZombieAction(ZombieActions.STAND);
+                                //        }
+                                //        break;
+                                //    case 3:
+                                //        if (x > -MAX_OFFSET_X && map[(int)(y / 5), (int)((x - 1) / 5)] == 0)
+                                //            zUnits[q].changePosition(-1, 0);
+                                //        else
+                                //        {
+                                //            zUnits[q].setDirection(2);
+                                //            zUnits[q].setZombieAction(ZombieActions.STAND);
+                                //        }
+                                //        break;
+                                //}
                             }
                         }
                     }
@@ -1009,6 +1011,98 @@ namespace WindowsFormsApplication2
 
                 Invalidate();
             }
+        }
+
+        void ZombieStep(Zombie zUnit, float x, float y, float sx, float sy, int dir, int step)
+        {
+            int[,] DirList = new int[4, 3]
+            {
+                { 0, 1, 3 },
+                { 1, 0, 2 },
+                { 2, 1, 3 },
+                { 3, 0, 2 }
+            };
+
+            zUnit.setDirection(dir);
+            //Point TP = ZombieCanStep(zUnit, x, y, sx, sy, dir);
+            //if (TP.X != 0 && TP.Y != 0)
+            //    zUnit.changePosition(TP);
+            //if (step < 2)
+            //{
+            //    step++;
+            //    ZombieStep(zUnit, x, y, sx, sy, DirList[dir, step], step);
+            //}
+            switch (dir)
+            {
+                case 0:
+                    if (y > -MAX_OFFSET_Y && map[(int)((y - 1) / 5), (int)(x / 5)] == 0 && map[(int)((y - 1) / 5), (int)((x + sx) / 5)] == 0)
+                        zUnit.changePosition(0, -1);
+                    else if (step < 2)
+                    {
+                        step++;
+                        ZombieStep(zUnit, x, y, sx, sy, DirList[dir, step], step);
+                        //zUnit.setDirection(3);
+                        //zUnit.setZombieAction(ZombieActions.STAND);
+                    }
+                    break;
+                case 1:
+                    if (x + sx < 1920 + MAX_OFFSET_X && map[(int)(y / 5), (int)((x + sx + 1) / 5)] == 0 && map[(int)((y + sy) / 5), (int)((x + sx + 1) / 5)] == 0)
+                        zUnit.changePosition(1, 0);
+                    else if (step < 2)
+                    {
+                        step++;
+                        ZombieStep(zUnit, x, y, sx, sy, DirList[dir, step], step);
+                        //zUnit.setDirection(0);
+                        //zUnit.setZombieAction(ZombieActions.STAND);
+                    }
+                    break;
+                case 2:
+                    if (y + sy < 1080 + MAX_OFFSET_Y && map[(int)((y + sy + 1) / 5), (int)(x / 5)] == 0 && map[(int)((y + sy + 1) / 5), (int)((x + sx) / 5)] == 0)
+                        zUnit.changePosition(0, 1);
+                    else if (step < 2)
+                    {
+                        step++;
+                        ZombieStep(zUnit, x, y, sx, sy, DirList[dir, step], step);
+                        //zUnit.setDirection(1);
+                        //zUnit.setZombieAction(ZombieActions.STAND);
+                    }
+                    break;
+                case 3:
+                    if (x > -MAX_OFFSET_X && map[(int)(y / 5), (int)((x - 1) / 5)] == 0 && map[(int)((y + sy) / 5), (int)((x - 1) / 5)] == 0)
+                        zUnit.changePosition(-1, 0);
+                    else if (step < 2)
+                    {
+                        step++;
+                        ZombieStep(zUnit, x, y, sx, sy, DirList[dir, step], step);
+                        //zUnit.setDirection(2);
+                        //zUnit.setZombieAction(ZombieActions.STAND);
+                    }
+                    break;
+            }
+        }
+
+        Point ZombieCanStep(Zombie zUnit, float x, float y, float sx, float sy, int dir)
+        {
+            switch (dir)
+            {
+                case 0:
+                    if (y > -MAX_OFFSET_Y && map[(int)((y - 1) / 5), (int)(x / 5)] == 0 && map[(int)((y - 1) / 5), (int)((x + sx) / 5)] == 0)
+                        return new Point(0, -1);
+                    break;
+                case 1:
+                    if (x + sx < 1920 + MAX_OFFSET_X && map[(int)(y / 5), (int)((x + sx + 1) / 5)] == 0 && map[(int)((y + sy) / 5), (int)((x + sx + 1) / 5)] == 0)
+                        return new Point(1, 0);
+                    break;
+                case 2:
+                    if (y + sy < 1080 + MAX_OFFSET_Y && map[(int)((y + sy + 1) / 5), (int)(x / 5)] == 0 && map[(int)((y + sy + 1) / 5), (int)((x + sx) / 5)] == 0)
+                        return new Point(0, 1);
+                    break;
+                case 3:
+                    if (x > -MAX_OFFSET_X && map[(int)(y / 5), (int)((x - 1) / 5)] == 0 && map[(int)((y + sy) / 5), (int)((x - 1) / 5)] == 0)
+                        return new Point(-1, 0);
+                    break;
+            }
+            return new Point(0, 0);
         }
 
         SizeF GetResolutionRatio()
